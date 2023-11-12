@@ -6,6 +6,23 @@ const upload = multer();
 
 app.use(express.json());
 
+const loadNotes = () => {
+    try {
+        const data = fs.readFileSync('notes.json', 'utf8');
+        notes = JSON.parse(data);
+    } catch (error) {
+        console.error('Error loading notes:', error.message);
+    }
+};
+
+const saveNotes = () => {
+    try {
+        const jsonNotes = JSON.stringify(notes, null, 2);
+        fs.writeFileSync('notes.json', jsonNotes, 'utf8');
+    } catch (error) {
+        console.error('Error saving notes:', error.message);
+    }
+};
 
 let notes = [];
 app.get("/", (req, res) => {
@@ -41,6 +58,7 @@ app.post("/upload", upload.none(), (req, res) => {
     }
     else {
         notes.push({ note_name: note_name, note: note });
+        saveNotes();
         res.status(201).end();
     }
 })
@@ -52,6 +70,7 @@ app.delete("/notes/:note_name", (req, res) => {
 
     if (noteIndex !== -1) {
         notes.splice(noteIndex, 1);
+        saveNotes();
         res.status(200).end();
     }
     else {
@@ -77,6 +96,7 @@ app.put("/notes/:note_name", (req, res) => {
         }
         if (noteIndex !== -1) {
             notes[noteIndex].note = new_note;
+            saveNotes();
             res.status(201).end();
         } else {
             res.status(400).end();
@@ -84,5 +104,6 @@ app.put("/notes/:note_name", (req, res) => {
     });
 })
 
+loadNotes();
 
 app.listen(8000);
