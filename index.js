@@ -10,8 +10,12 @@ const loadNotes = () => {
     try {
         const data = fs.readFileSync('notes.json', 'utf8');
         notes = JSON.parse(data);
-    } catch (error) {
-        console.error('Error loading notes:', error.message);
+    } catch (error) {   
+        if (error.code === 'ENOENT') {
+            notes = [];
+        } else {
+            console.error('Error loading notes:', error.message);
+        }
     }
 };
 
